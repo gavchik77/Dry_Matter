@@ -1,0 +1,85 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Feed Dry Matter Tutor</title>
+<style>
+body{font-family:system-ui;margin:0;background:#f5f7f3;color:#203024}.wrap{max-width:980px;margin:auto;padding:20px}.hero{background:#315b3a;color:white;padding:36px 0}.card{background:white;border:1px solid #dce5dd;border-radius:16px;padding:22px;margin:18px 0}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.four{grid-template-columns:repeat(4,1fr)}input,select{width:100%;padding:9px;margin-top:5px;border:1px solid #c9d4cb;border-radius:9px;box-sizing:border-box}.formula{background:#f1f6f2;border-left:4px solid #315b3a;padding:11px;margin:12px 0;font-family:monospace}.fb{padding:10px;border-radius:9px;background:#f1f2f1;margin-top:10px}.ok{background:#e8f3ea;color:#1d6a3d}.bad{background:#fae9e7;color:#9a352f}.good{border-color:#315b3a;background:#fbfffc}.wrong{border-color:#9a352f;background:#fffafa}button{background:#315b3a;color:white;border:0;border-radius:9px;padding:10px 13px;font-weight:700;cursor:pointer}.secondary{background:#e8eeea;color:#203024}table{width:100%;border-collapse:collapse}th,td{padding:8px;border-bottom:1px solid #dce5dd;text-align:right}th:first-child,td:first-child{text-align:left}.small{color:#69746c;font-size:.9rem}.score{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.score div{background:#f8faf8;padding:10px;border-radius:10px}@media(max-width:650px){.grid,.four,.score{grid-template-columns:1fr}}
+</style></head><body>
+<div class="hero"><div class="wrap"><h1>Feed Dry Matter Conversion Tutor</h1><p>Convert feed constituents from as-fed values to a dry-matter basis.</p></div></div>
+<main class="wrap">
+<section class="card"><h2>Student score</h2><div class="score"><div>Attempts<br><b id="att">0</b></div><div>Successful<br><b id="suc">0</b></div><div>Unsuccessful<br><b id="fail">0</b></div><div>Completed<br><b id="comp">0 / 5</b></div></div><div id="scoreRows"></div><button class="secondary" id="reset">Reset marks</button></section>
+
+<section class="card"><h2>Key formulas</h2>
+<div class="formula">DM % = 100 − Moisture %</div>
+<div class="formula">Nutrient % on DM basis = As-fed nutrient % × 100 ÷ DM %</div>
+<div class="formula">As-fed nutrient % = DM-basis nutrient % × DM % ÷ 100</div>
+<p class="small">Dry-matter conversion does not create nutrient. It removes water from the denominator so feeds with different moisture contents can be compared. The same calculation can be used for any constituent expressed as an as-fed percentage — for example crude protein, fat, fibre, ash, minerals or Omega-6.</p></section>
+
+<section class="card"><h2>1. Find the dry matter</h2><p>Dry food: 30% protein, 10% moisture. Canned food: 9% protein, 78% moisture.</p>
+<div class="grid"><label>Dry food DM %<input id="dryDM" type="number"></label><label>Canned food DM %<input id="wetDM" type="number"></label></div><div id="fb1" class="fb">Use 100 − moisture %.</div><button onclick="record('l1')">Mark this attempt</button></section>
+
+<section class="card"><h2>2. Convert protein to a DM basis</h2>
+<div class="grid"><label>Dry food protein, DM basis %<input id="dryP" type="number" step=".1"></label><label>Canned food protein, DM basis %<input id="wetP" type="number" step=".1"></label></div>
+<label>Which is higher on a DM basis?<select id="which"><option value="">Choose</option><option value="dry">Dry food</option><option value="wet">Canned food</option></select></label>
+<div id="fb2" class="fb">Convert both before comparing.</div><button onclick="record('l2')">Mark this attempt</button></section>
+
+<section class="card"><h2>3. Recalculate the full poultry-feed label</h2><p>Premium Poultry Mixed Corn: moisture 22%, CP 13.5%, oil/fat 3.4%, fibre 2.3%, ash 2.0%, sodium 0.01%.</p>
+<div class="grid"><label>DM %<input id="pdm" type="number"></label><label>CP on DM basis %<input id="cp" type="number" step=".01"></label><label>Oil/fat on DM basis %<input id="fat" type="number" step=".01"></label><label>Fibre on DM basis %<input id="fib" type="number" step=".01"></label><label>Ash on DM basis %<input id="ash" type="number" step=".01"></label><label>Sodium on DM basis %<input id="na" type="number" step=".001"></label></div>
+<div id="fb3" class="fb">First find DM = 100 − 22, then use the same DM denominator for every constituent.</div><button onclick="record('l3')">Mark this attempt</button></section>
+
+<section class="card"><h2>4. Reverse the calculation</h2><p>A feed is 40% crude protein on a DM basis and 90% DM. What is crude protein as-fed?</p><label>CP as-fed %<input id="rev" type="number" step=".1"></label><div id="fb4" class="fb">Use DM-basis nutrient % × DM % ÷ 100.</div><button onclick="record('l4')">Mark this attempt</button></section>
+
+<section class="card"><h2>5. Practice generator — different feeds and nutrients</h2>
+<p>The feed type and values change each time. Practice cases include <strong>protein, fat, fibre and Omega-6</strong>, all recalculated from as-fed to dry-matter basis.</p>
+<p class="small"><strong>Teaching note:</strong> the generated feed names and numbers are illustrative practice values, not reference feed-composition values.</p>
+<button id="new">Generate new feed</button><div id="case" class="formula"></div>
+<div class="grid">
+<label>DM %<input id="qdm" type="number" step=".1"></label>
+<label>Protein on DM basis %<input id="qcp" type="number" step=".1"></label>
+<label>Fat on DM basis %<input id="qfat" type="number" step=".1"></label>
+<label>Fibre on DM basis %<input id="qfib" type="number" step=".1"></label>
+<label>Omega-6 on DM basis %<input id="qomega" type="number" step=".1"></label>
+</div>
+<div class="formula">Omega-6 % DM = Omega-6 % as-fed × 100 ÷ DM %</div>
+<div id="fb5" class="fb">Calculate DM first, then recalculate each constituent using the same DM denominator.</div>
+<button onclick="record('practice')">Mark this attempt</button></section>
+</main>
+<script>
+const $=id=>document.getElementById(id),v=id=>parseFloat($(id).value),near=(a,b,t)=>Number.isFinite(a)&&Math.abs(a-b)<=t;
+const key='feedDMTutorV1',labels={l1:'1 · Find DM',l2:'2 · Convert protein',l3:'3 · Full feed label',l4:'4 · Reverse conversion',practice:'5 · Practice'};
+const blank=()=>Object.fromEntries(Object.keys(labels).map(k=>[k,{a:0,s:0,f:0,b:0,c:false}]));
+let scores;try{scores={...blank(),...JSON.parse(localStorage.getItem(key)||'{}')}}catch(e){scores=blank()}
+function save(){localStorage.setItem(key,JSON.stringify(scores))}
+function style(id,ok){if(!$(id).value)return;$(id).classList.toggle('good',ok);$(id).classList.toggle('wrong',!ok)}
+function msg(id,ok,text){$(id).className='fb '+(ok?'ok':'bad');$(id).textContent=text}
+function l1(){let a=v('dryDM'),b=v('wetDM');style('dryDM',near(a,90,.05));style('wetDM',near(b,22,.05));if(Number.isFinite(a)&&Number.isFinite(b))msg('fb1',near(a,90,.05)&&near(b,22,.05),'Correct values: 90% DM and 22% DM.');}
+function l2(){let a=v('dryP'),b=v('wetP'),ok1=near(a,33.333,.15),ok2=near(b,40.909,.15),ok3=$('which').value==='wet';style('dryP',ok1);style('wetP',ok2);if(Number.isFinite(a)&&Number.isFinite(b)&&$('which').value)msg('fb2',ok1&&ok2&&ok3,'Dry food ≈33.3% CP DM; canned food ≈40.9% CP DM.');}
+function l3(){let dm=78,ans={pdm:78,cp:13.5*100/dm,fat:3.4*100/dm,fib:2.3*100/dm,ash:2*100/dm,na:.01*100/dm};let ids=Object.keys(ans);ids.forEach(id=>style(id,near(v(id),ans[id],id==='na'?.002:.08)));if(ids.every(id=>Number.isFinite(v(id))))msg('fb3',ids.every(id=>near(v(id),ans[id],id==='na'?.002:.08)),'Correct: DM 78%; CP 17.31%; fat 4.36%; fibre 2.95%; ash 2.56%; sodium 0.013%.');}
+function l4(){let a=v('rev'),ok=near(a,36,.08);style('rev',ok);if(Number.isFinite(a))msg('fb4',ok,'Correct: 40 × 90 ÷ 100 = 36% as-fed.');}
+['dryDM','wetDM'].forEach(id=>$(id).oninput=l1);['dryP','wetP'].forEach(id=>$(id).oninput=l2);$('which').onchange=l2;['pdm','cp','fat','fib','ash','na'].forEach(id=>$(id).oninput=l3);$('rev').oninput=l4;
+let q;
+const practiceFeeds=[
+  {name:'Dry poultry feed', moisture:[8,10,12], cp:[14,16,18], fat:[3,4,5], fib:[3,4,5], omega:[1.5,2.0,2.5]},
+  {name:'Wet companion-animal feed', moisture:[68,72,76], cp:[7,9,11], fat:[4,6,8], fib:[1,2,3], omega:[0.8,1.2,1.6]},
+  {name:'High-moisture forage sample', moisture:[70,75,80], cp:[3,4,5], fat:[1,1.5,2], fib:[5,7,9], omega:[0.4,0.6,0.8]},
+  {name:'Oilseed-rich feed', moisture:[8,10,12], cp:[18,22,26], fat:[8,10,12], fib:[5,7,9], omega:[3,4,5]},
+  {name:'Cereal-based feed', moisture:[10,12,14], cp:[9,11,13], fat:[2,3,4], fib:[3,5,7], omega:[1,1.5,2]}
+];
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function gen(){
+  let f=pick(practiceFeeds),m=pick(f.moisture),dm=100-m,cp=pick(f.cp),fat=pick(f.fat),fib=pick(f.fib),omega=pick(f.omega);
+  q={name:f.name,m,dm,cp,fat,fib,omega,acp:cp*100/dm,afat:fat*100/dm,afib:fib*100/dm,aomega:omega*100/dm};
+  $('case').innerHTML=`<strong>${f.name}</strong><br>Moisture ${m}%; as-fed: protein ${cp}%, fat ${fat}%, fibre ${fib}%, Omega-6 ${omega}%.`;
+  ['qdm','qcp','qfat','qfib','qomega'].forEach(id=>{$(id).value='';$(id).className=''});
+  $('fb5').className='fb';$('fb5').textContent='Calculate DM first, then recalculate every constituent.';
+}
+function chkq(){
+  if(!q)return;
+  let checks=[['qdm',q.dm,.08],['qcp',q.acp,.15],['qfat',q.afat,.15],['qfib',q.afib,.15],['qomega',q.aomega,.15]];
+  checks.forEach(x=>style(x[0],near(v(x[0]),x[1],x[2])));
+  if(checks.every(x=>Number.isFinite(v(x[0]))))msg('fb5',checks.every(x=>near(v(x[0]),x[1],x[2])),'All five calculations are correct.');
+}
+['qdm','qcp','qfat','qfib','qomega'].forEach(id=>$(id).oninput=chkq);$('new').onclick=gen;
+function result(k){if(k==='l1')return[near(v('dryDM'),90,.05),near(v('wetDM'),22,.05)];if(k==='l2')return[near(v('dryP'),33.333,.15),near(v('wetP'),40.909,.15),$('which').value==='wet'];if(k==='l3')return[near(v('pdm'),78,.08),near(v('cp'),17.3077,.08),near(v('fat'),4.359,.08),near(v('fib'),2.9487,.08),near(v('ash'),2.5641,.08),near(v('na'),.01282,.002)];if(k==='l4')return[near(v('rev'),36,.08)];if(k==='practice'&&q)return[near(v('qdm'),q.dm,.08),near(v('qcp'),q.acp,.15),near(v('qfat'),q.afat,.15),near(v('qfib'),q.afib,.15),near(v('qomega'),q.aomega,.15)];return null}
+function record(k){let r=result(k);if(!r){alert('Complete the exercise first.');return}let n=r.filter(Boolean).length,p=Math.round(n/r.length*100),ok=n===r.length,s=scores[k];s.a++;ok?s.s++:s.f++;if(ok)s.c=true;s.b=Math.max(s.b,p);save();render();alert(ok?`Marked: ${p}% — successful.`:`Marked: ${p}% — ${n} of ${r.length} correct.`)}
+function render(){let A=0,S=0,F=0,C=0,rows='<table><tr><th>Exercise</th><th>Attempts</th><th>Success</th><th>Fail</th><th>Best</th></tr>';Object.keys(labels).forEach(k=>{let s=scores[k];A+=s.a;S+=s.s;F+=s.f;if(s.c)C++;rows+=`<tr><td>${labels[k]}</td><td>${s.a}</td><td>${s.s}</td><td>${s.f}</td><td>${s.a?s.b+'%':'—'}</td></tr>`});$('scoreRows').innerHTML=rows+'</table>';$('att').textContent=A;$('suc').textContent=S;$('fail').textContent=F;$('comp').textContent=C+' / 5'}
+$('reset').onclick=()=>{if(confirm('Reset marks?')){scores=blank();save();render()}};gen();render();
+</script></body></html>
